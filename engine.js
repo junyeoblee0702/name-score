@@ -115,4 +115,32 @@ function score(surname, given) {
   };
 }
 
-if (typeof module !== 'undefined') module.exports = { candidates: candidates, surnameCandidates: surnameCandidates, nameCandidates: nameCandidates, strokeOf: strokeOf, score: score, norm81: norm81, GRADE_81: GRADE_81, hangulStroke: hangulStroke };
+// 발음오행: 초성으로 나눈다 (훈민정음 해례본 계열. ㅇ·ㅎ을 水로 보는 학파도 있다).
+// 초성 순서: ㄱㄲㄴㄷㄸㄹㅁㅂㅃㅅㅆㅇㅈㅉㅊㅋㅌㅍㅎ
+var CHO_EL = ['木','木','火','火','火','火','水','水','水','金','金','土','金','金','金','木','火','水','土'];
+var EL_ORDER = '木火土金水'; // 앞이 뒤를 살린다(상생), 두 칸 건너는 극한다(상극)
+function soundElement(ch) {
+  var c = ch.charCodeAt(0) - 0xAC00;
+  return (c < 0 || c > 11171) ? null : CHO_EL[Math.floor(c / 588)];
+}
+function relation(a, b) {
+  if (!a || !b) return null;
+  var i = EL_ORDER.indexOf(a), j = EL_ORDER.indexOf(b);
+  if (i === j) return '같음';
+  if ((i + 1) % 5 === j || (j + 1) % 5 === i) return '상생';
+  return '상극';
+}
+// 소리 기운 흐름: 글자마다 오행, 이웃한 글자끼리 관계
+function soundFlow(chars) {
+  var els = chars.map(soundElement);
+  var rel = [];
+  for (var k = 0; k + 1 < els.length; k++) rel.push(relation(els[k], els[k + 1]));
+  return { elements: els, relations: rel, clash: rel.indexOf('상극') >= 0 };
+}
+// 음양: 획수 홀수 양, 짝수 음. 한쪽으로만 몰리면 치우친 것으로 본다.
+function yinYang(strokes) {
+  var marks = strokes.map(function (n) { return n % 2 ? '양' : '음'; });
+  return { marks: marks, balanced: marks.indexOf('양') >= 0 && marks.indexOf('음') >= 0 };
+}
+
+if (typeof module !== 'undefined') module.exports = { candidates: candidates, surnameCandidates: surnameCandidates, nameCandidates: nameCandidates, strokeOf: strokeOf, score: score, norm81: norm81, GRADE_81: GRADE_81, hangulStroke: hangulStroke, soundElement: soundElement, relation: relation, soundFlow: soundFlow, yinYang: yinYang };

@@ -3,90 +3,127 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
-<title>내 이름 점수</title>
-<meta name="description" content="성과 이름만 넣으면 81수리로 이름 점수를 알려 드려요. 재미로 보는 풀이입니다.">
+<title>이름 풀이 - 무료 이름 점수 · 81수리 성명학</title>
+<meta name="description" content="성과 이름만 넣으면 81수리 성명학으로 이름 점수와 인생 흐름을 무료로 풀어 드려요. 인명용 한자 8천여 자 원획 계산, 결과 카드 저장.">
+<meta property="og:type" content="website">
+<meta property="og:title" content="내 이름, 몇 점일까? - 이름 풀이">
+<meta property="og:description" content="81수리 성명학으로 보는 무료 이름 점수와 인생 흐름">
+<meta property="og:image" content="og.png">
+<meta name="theme-color" content="#ffffff">
 <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/pretendard@1.3.9/dist/web/variable/pretendardvariable-dynamic-subset.min.css">
 <link rel="preconnect" href="https://fonts.googleapis.com">
-<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Noto+Serif+KR:wght@600&display=swap">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Noto+Serif+KR:wght@600;700&display=swap">
 <link rel="stylesheet" href="tokens.css">
 <link rel="stylesheet" href="app.css">
 </head>
 <body>
+<svg width="0" height="0" style="position:absolute" aria-hidden="true">
+  <defs>
+    <!-- 구름 문양 (직접 그림) -->
+    <symbol id="cloud" viewBox="0 0 120 48">
+      <path d="M8 40h104M20 40c-8 0-12-6-10-12s10-8 14-4c0-10 10-16 19-12 4-8 16-10 23-3 8-4 18 2 18 11 7-1 12 5 10 12" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round"/>
+      <path d="M40 30c0-5 6-7 9-3M64 22c3-4 10-3 11 2" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round"/>
+    </symbol>
+    <symbol id="lock" viewBox="0 0 24 24"><rect x="5" y="11" width="14" height="9" rx="2" fill="none" stroke="currentColor" stroke-width="1.8"/><path d="M8 11V8a4 4 0 018 0v3" fill="none" stroke="currentColor" stroke-width="1.8"/></symbol>
+  </defs>
+</svg>
 <main id="app">
 
   <!-- 1. 입력 -->
   <section class="screen" id="s-input">
-    <p class="eyebrow">81수리 이름 풀이</p>
-    <h1 class="title">내 이름,<br>몇 점일까?</h1>
-    <p class="lead">성과 이름만 넣으면 돼요. 생년월일은 받지 않아요.</p>
+    <header class="topbar"><span class="mini-seal" aria-hidden="true">名</span><b>이름풀이</b></header>
+
+    <div class="hero">
+      <svg class="hero-cloud" aria-hidden="true"><use href="#cloud"/></svg>
+      <p class="eyebrow">81수리 성명학 · 무료</p>
+      <h1 class="title">내 이름에 담긴<br>운의 흐름</h1>
+      <p class="lead">성과 이름만 넣으면 돼요.<br>생년월일은 받지 않아요.</p>
+    </div>
 
     <div class="fields">
       <div class="field field-sn">
         <label for="sn">성</label>
-        <input id="sn" inputmode="text" autocomplete="off" maxlength="1" placeholder="김">
+        <input id="sn" autocomplete="off" maxlength="1" placeholder="김">
       </div>
       <div class="field">
         <label for="gn">이름</label>
-        <input id="gn" inputmode="text" autocomplete="off" maxlength="2" placeholder="민준">
+        <input id="gn" autocomplete="off" maxlength="2" placeholder="민준">
       </div>
     </div>
     <p class="error" id="err" role="alert" hidden></p>
 
-    <ul class="points">
-      <li><span class="ic" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="M4 6h16M4 12h10M4 18h7"/></svg></span>인명용 한자 8천여 자를 원획으로 계산해요</li>
-      <li><span class="ic" aria-hidden="true"><svg viewBox="0 0 24 24"><rect x="4" y="4" width="16" height="16" rx="3"/><path d="M9 12l2 2 4-4"/></svg></span>원격·형격·이격·정격 네 가지를 풀어 드려요</li>
-      <li><span class="ic" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="M12 4v11M7 10l5 5 5-5M5 20h14"/></svg></span>결과 카드를 이미지로 저장할 수 있어요</li>
+    <h2 class="section">이런 걸 풀어 드려요</h2>
+    <ul class="menu">
+      <li><span class="menu-ic" aria-hidden="true"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="8"/><path d="M12 7v5l3 2"/></svg></span><b>이름 점수</b><small>무료</small></li>
+      <li><span class="menu-ic" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="M3 17l5-6 4 3 5-7 4 4"/></svg></span><b>인생 흐름</b><small>무료</small></li>
+      <li><span class="menu-ic" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="M12 3c3 4 6 6 6 10a6 6 0 01-12 0c0-4 3-6 6-10z"/></svg></span><b>소리 기운</b><small>전체 풀이</small></li>
+      <li><span class="menu-ic" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="M5 4h14v16H5zM9 8h6M9 12h6M9 16h3"/></svg></span><b>한자 뜻 해설</b><small>전체 풀이</small></li>
     </ul>
 
-    <div class="dock"><button class="btn" id="to-hanja">다음</button></div>
+    <div class="dock"><button class="btn" id="to-hanja">무료로 풀어 보기</button></div>
   </section>
 
   <!-- 2. 한자 고르기 -->
   <section class="screen" id="s-hanja" hidden>
-    <button class="back" data-back="s-input" aria-label="이전">
-      <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M15 5l-7 7 7 7"/></svg>
-    </button>
-    <h2 class="title2">한자를 골라 주세요</h2>
-    <p class="lead">모르면 '모름'을 두고 넘어가도 돼요. 한자를 고르면 더 정확해요.</p>
+    <button class="back" data-back="s-input" aria-label="이전"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M15 5l-7 7 7 7"/></svg></button>
+    <h2 class="title2">이름의 한자를 골라 주세요</h2>
+    <p class="lead">모르면 '모름'으로 두고 넘어가도 돼요.</p>
     <div id="pickers"></div>
-    <div class="dock"><button class="btn" id="to-result">점수 보기</button></div>
+    <div class="dock"><button class="btn" id="to-result">풀이 보기</button></div>
   </section>
 
   <!-- 3. 결과 -->
-  <section class="screen" id="s-result" hidden>
-    <button class="back" data-back="s-hanja" aria-label="이전">
-      <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M15 5l-7 7 7 7"/></svg>
-    </button>
+  <section class="screen screen-result" id="s-result" hidden>
+    <button class="back" data-back="s-hanja" aria-label="이전"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M15 5l-7 7 7 7"/></svg></button>
 
+    <div class="report-head">
+      <div class="seal" id="seal" aria-hidden="true"></div>
+      <div>
+        <p class="eyebrow">이름 풀이</p>
+        <h1 class="title2" id="who"></h1>
+        <p class="who-sub" id="who-sub"></p>
+      </div>
+    </div>
+
+    <div class="score-card">
+      <div class="score-row">
+        <div class="score-num"><b id="score">0</b><span>점</span></div>
+        <span class="grade" id="grade"></span>
+      </div>
+      <p class="summary" id="summary"></p>
+      <p class="hint" id="approx" hidden>한자를 고르지 않은 글자는 한글 획수로 어림했어요.</p>
+    </div>
+
+    <h2 class="section">인생 흐름 <small>무료</small></h2>
+    <div class="flow" id="flow"></div>
+
+    <h2 class="section">글자별 획수</h2>
     <div class="namegrid" id="namegrid"></div>
 
-    <div class="scorebox">
-      <div class="score-num"><b id="score">0</b><span>점</span></div>
-      <span class="grade" id="grade"></span>
-    </div>
-    <p class="summary" id="summary"></p>
-    <p class="hint" id="approx" hidden>한자를 고르지 않은 글자는 한글 획수로 어림했어요.</p>
-
-    <h3 class="section">네 가지 격</h3>
+    <h2 class="section">네 가지 격 <small>무료</small></h2>
     <ul class="frames" id="frames"></ul>
 
-    <h3 class="section">결과 카드</h3>
-    <canvas id="card" width="1080" height="1350" aria-label="이름 점수 결과 카드"></canvas>
+    <h2 class="section">전체 풀이에 들어 있는 것</h2>
+    <div class="locked" id="locked"></div>
+    <button class="btn btn-inline" id="pay1b">전체 풀이 열기 · 990원</button>
+
+    <h2 class="section">결과 카드</h2>
+    <canvas id="card" width="1080" height="1350" aria-label="이름 풀이 결과 카드"></canvas>
     <div class="card-actions">
       <button class="btn-sub" id="save">이미지 저장</button>
-      <button class="btn-sub" id="share">공유하기</button>
+      <button class="btn-sub" id="share">친구에게 공유</button>
     </div>
 
-    <h3 class="section">더 보기</h3>
-    <button class="row" id="pay2" type="button">
-      <span class="ic" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="M12 20s-7-4.4-7-10a4 4 0 017-2.6A4 4 0 0119 10c0 5.6-7 10-7 10z"/></svg></span>
-      <span class="row-text"><b>개명·아기 이름 추천</b><small>사주 없이 획수·뜻으로 이름 5개 추천</small></span>
-      <span class="row-price">39,000원</span>
-    </button>
+    <h2 class="section">다른 풀이</h2>
+    <div class="tiles">
+      <button class="tile" id="t-match" type="button"><span class="menu-ic" aria-hidden="true"><svg viewBox="0 0 24 24"><circle cx="9" cy="12" r="5"/><circle cx="15" cy="12" r="5"/></svg></span><b>이름 궁합</b><small>두 사람 이름으로</small><em>곧 열려요</em></button>
+      <button class="tile" id="t-baby" type="button"><span class="menu-ic" aria-hidden="true"><svg viewBox="0 0 24 24"><circle cx="12" cy="9" r="4"/><path d="M5 20c1-4 4-6 7-6s6 2 7 6"/></svg></span><b>아기 이름 짓기</b><small>이름 5개 추천</small><em>39,000원</em></button>
+      <button class="tile" id="t-rename" type="button"><span class="menu-ic" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="M4 20l4-1 11-11-3-3L5 16zM14 6l3 3"/></svg></span><b>개명 이름 추천</b><small>새 이름 5개 추천</small><em>39,000원</em></button>
+    </div>
 
-    <p class="fine">재미로 보는 풀이이며 과학적 근거는 없습니다. 81수리 길흉은 학파마다 다를 수 있어요. 입력한 이름과 한자는 저장하거나 서버로 보내지 않아요. 방문·버튼 클릭 횟수만 쿠키 없이 셉니다.</p>
+    <p class="fine">재미로 보는 풀이이며 과학적 근거는 없습니다. 81수리 길흉과 발음오행은 학파마다 다를 수 있어요. 입력한 이름과 한자는 저장하거나 서버로 보내지 않아요. 방문·버튼 클릭 횟수만 쿠키 없이 셉니다.</p>
 
-    <div class="dock"><button class="btn" id="pay1">전체 풀이 보기 · 990원</button></div>
+    <div class="dock"><button class="btn" id="pay1">전체 풀이 열기 · 990원</button></div>
   </section>
 </main>
 

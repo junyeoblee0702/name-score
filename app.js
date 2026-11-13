@@ -145,6 +145,17 @@
       c.appendChild(el('div', 'n', info.stroke + '획'));
       grid.appendChild(c);
     });
+    // 이름 도장: 한자가 있으면 한자, 없으면 한글. 세 글자면 '印'을 더해 2x2
+    var sealChars = chars.map(function (ch, i) { return state.pick[i] || ch; });
+    if (sealChars.length === 3) sealChars.push('印');
+    var seal = $('seal'); seal.textContent = '';
+    sealChars.forEach(function (c) { seal.appendChild(el('span', null, c)); });
+    $('who').textContent = chars.join('') + ' 님의 이름 풀이';
+    $('who-sub').textContent = state.pick.some(Boolean)
+      ? chars.map(function (ch, i) { return state.pick[i] || ch; }).join('') + ' · 총 ' + r.chars.reduce(function (a, c) { return a + c.stroke; }, 0) + '획'
+      : '한자 없이 한글로 계산했어요';
+    drawFlow(r);
+    drawLocked(r, chars);
     $('score').textContent = r.total;
     $('grade').textContent = grade(r.total);
     $('summary').textContent = summary(r.total);
@@ -162,61 +173,127 @@
     drawCard(r);
   }
 
-  // ── 결과 카드 (캔버스, 1080×1350) ─────────────────────
+  // ── 인생 흐름 그래프 (SVG) ──────────────────────────
+  var NS = 'http://www.w3.org/2000/svg';
+  function svgEl(tag, attrs, text) {
+    var e = document.createElementNS(NS, tag);
+    Object.keys(attrs).forEach(function (k) { e.setAttribute(k, attrs[k]); });
+    if (text != null) e.textContent = text;
+    return e;
+  }
+  function drawFlow(r) {
+    var W = 340, H = 170, L = 16, R = 16, T = 28, B = 40;
+    var svg = svgEl('svg', { viewBox: '0 0 ' + W + ' ' + H, role: 'img',
+      'aria-label': '인생 흐름: ' + r.detail.map(function (d) { return d.life + ' ' + d.gradeName; }).join(', ') });
+    var xs = r.detail.map(function (d, i) { return L + i * (W - L - R) / 3; });
+    var ys = r.detail.map(function (d) { return T + (3 - d.grade) * (H - T - B) / 3; });
+    [0, 1, 2, 3].forEach(function (g) {
+      var y = T + g * (H - T - B) / 3;
+      svg.appendChild(svgEl('line', { x1: L, x2: W - R, y1: y, y2: y, 'class': 'axis' }));
+    });
+    var pts = xs.map(function (x, i) { return x + ',' + ys[i]; }).join(' ');
+    svg.appendChild(svgEl('polygon', { points: L + ',' + (H - B) + ' ' + pts + ' ' + (W - R) + ',' + (H - B), 'class': 'area' }));
+    svg.appendChild(svgEl('polyline', { points: pts, 'class': 'lineP' }));
+    r.detail.forEach(function (d, i) {
+      svg.appendChild(svgEl('circle', { cx: xs[i], cy: ys[i], r: 6, 'class': 'dot' }));
+      var anchor = i === 0 ? 'start' : i === 3 ? 'end' : 'middle';
+      svg.appendChild(svgEl('text', { x: xs[i], y: ys[i] - 12, 'text-anchor': anchor, 'class': 'v' }, d.gradeName));
+      svg.appendChild(svgEl('text', { x: xs[i], y: H - 12, 'text-anchor': anchor }, d.life));
+    });
+    var box = $('flow'); box.textContent = ''; box.appendChild(svg);
+  }
+
+  // ── 990원 전체 풀이 미리 보기 (제목·핵심 값은 보이고 해설은 흐림) ──
+  var BLUR_TEXT = '이 이름은 첫소리가 이어지며 서로를 받쳐 주는 흐름이에요. 어려서는 주변의 도움이 크고, 사회에 나가서는 사람을 모으는 힘으로 이어져요. 다만 가까운 관계에서는';
+  function drawLocked(r, chars) {
+    var box = $('locked'); box.textContent = '';
+    var flow = soundFlow(chars), yy = yinYang(r.chars.map(function (c) { return c.stroke; }));
+    var cards = [
+      { t: '소리 기운 (발음오행)', peek: function (p) {
+          flow.elements.forEach(function (e, i) {
+            p.appendChild(el('span', 'el', e || '?'));
+            if (i < flow.relations.length) p.appendChild(el('span', 'rel', flow.relations[i] || ''));
+          });
+        } },
+      { t: '음양 조화', peek: function (p) {
+          yy.marks.forEach(function (m) { p.appendChild(el('span', 'el', m)); });
+          p.appendChild(el('span', 'rel', yy.balanced ? '고르게 섞임' : '한쪽으로 치우침'));
+        } },
+      { t: '한자 뜻으로 읽는 이름', peek: function (p) {
+          var any = false;
+          chars.slice(1).forEach(function (ch, i) {
+            var hj = state.pick[i + 1];
+            if (hj) { any = true; p.appendChild(el('span', 'el', hj)); p.appendChild(el('span', 'rel', r.chars[i + 1].meaning)); }
+          });
+          if (!any) p.appendChild(el('span', 'rel', '이름 한자를 고르면 뜻을 엮어 풀어 드려요'));
+        } },
+      { t: '4격 상세 · 재물 · 건강 · 인연', peek: function (p) {
+          r.detail.forEach(function (d) { p.appendChild(el('span', 'el', String(d.num))); });
+        } }
+    ];
+    cards.forEach(function (c) {
+      var card = el('div', 'lock-card');
+      var top = el('div', 'lock-top'); top.appendChild(el('b', null, c.t));
+      var lk = document.createElementNS(NS, 'svg'); lk.setAttribute('aria-hidden', 'true');
+      var use = document.createElementNS(NS, 'use'); use.setAttribute('href', '#lock'); lk.appendChild(use);
+      top.appendChild(lk); card.appendChild(top);
+      var peek = el('div', 'lock-peek'); c.peek(peek); card.appendChild(peek);
+      var bl = el('p', 'blur', BLUR_TEXT); bl.setAttribute('aria-hidden', 'true'); card.appendChild(bl);
+      box.appendChild(card);
+    });
+  }
+
+  // ── 결과 카드 (캔버스, 1080x1350, 흰 바탕 + 이름 도장) ──
   function drawCard(r) {
     var cv = $('card'), x = cv.getContext('2d'), W = cv.width, H = cv.height;
-    var brand = '#1f3c88', white = '#ffffff', soft = 'rgba(255,255,255,0.72)', line = 'rgba(255,255,255,0.22)';
+    var red = '#b8322a', ink = '#1b1c20', sub = '#5f6a77', line = '#ebebee';
     var sans = '"Pretendard Variable", Pretendard, "Malgun Gothic", sans-serif';
     var serif = '"Noto Serif KR", Batang, serif';
-    x.fillStyle = brand; x.fillRect(0, 0, W, H);
+    x.fillStyle = '#ffffff'; x.fillRect(0, 0, W, H);
+    x.textBaseline = 'alphabetic'; x.textAlign = 'left';
 
-    x.fillStyle = soft; x.font = '600 40px ' + sans; x.textBaseline = 'alphabetic';
-    x.fillText('81수리 이름 풀이', 88, 140);
+    x.fillStyle = red; x.font = '800 40px ' + sans; x.fillText('이름 풀이', 88, 132);
+    x.fillStyle = sub; x.font = '500 36px ' + sans; x.fillText('81수리 성명학', 88, 184);
 
-    // 도장
-    x.save(); x.translate(W - 88 - 96, 76);
-    x.strokeStyle = white; x.lineWidth = 5; x.strokeRect(0, 0, 96, 96);
-    x.fillStyle = white; x.font = '600 60px ' + serif; x.textAlign = 'center'; x.fillText('名', 48, 70);
+    // 이름 도장 (오른쪽 세로줄부터 읽음)
+    var chars = [state.sn].concat(state.gn), sc = chars.map(function (ch, i) { return state.pick[i] || ch; });
+    if (sc.length === 3) sc.push('印');
+    var cell = 130, pad = 22, rows = sc.length > 2 ? 2 : sc.length, cols = sc.length > 2 ? 2 : 1;
+    var sw = cols * cell + pad * 2, sh = rows * cell + pad * 2, sx = W - 88 - sw, sy = 96;
+    x.save(); x.translate(sx + sw / 2, sy + sh / 2); x.rotate(-0.05); x.translate(-sw / 2, -sh / 2);
+    x.fillStyle = red; roundRect(x, 0, 0, sw, sh, 18); x.fill();
+    x.fillStyle = '#ffffff'; x.textAlign = 'center'; x.font = '700 112px ' + serif;
+    sc.forEach(function (c, i) {
+      var col = cols - 1 - Math.floor(i / rows), row = i % rows;
+      x.fillText(c, pad + col * cell + cell / 2, pad + row * cell + cell / 2 + 40);
+    });
     x.restore();
 
-    // 이름 칸
-    var chars = [state.sn].concat(state.gn), n = chars.length, cw = 220, gap = 24;
-    var x0 = (W - (n * cw + (n - 1) * gap)) / 2;
-    chars.forEach(function (ch, i) {
-      var cx = x0 + i * (cw + gap), hj = state.pick[i];
-      x.strokeStyle = line; x.lineWidth = 3; roundRect(x, cx, 240, cw, 300, 28); x.stroke();
-      x.textAlign = 'center'; x.fillStyle = white;
-      x.font = (hj ? '600 150px ' + serif : '800 130px ' + sans);
-      x.fillText(hj || ch, cx + cw / 2, 430);
-      x.fillStyle = soft; x.font = '500 38px ' + sans;
-      x.fillText(hj ? ch + ' · ' + r.chars[i].stroke + '획' : r.chars[i].stroke + '획', cx + cw / 2, 500);
-    });
-
-    // 점수
-    x.textAlign = 'left'; x.fillStyle = white;
-    x.font = '800 220px ' + sans; x.fillText(String(r.total), 88, 830);
-    var sw = x.measureText(String(r.total)).width;
-    x.font = '700 64px ' + sans; x.fillText('점', 88 + sw + 12, 830);
+    // 이름과 점수
+    x.textAlign = 'left'; x.fillStyle = ink; x.font = '800 64px ' + sans;
+    x.fillText(chars.join('') + ' 님', 88, 560);
+    x.fillStyle = red; x.font = '800 260px ' + sans; x.fillText(String(r.total), 80, 820);
+    var nw = x.measureText(String(r.total)).width;
+    x.fillStyle = ink; x.font = '800 72px ' + sans; x.fillText('점', 80 + nw + 12, 820);
     var pw = x.measureText('점').width;
-    x.font = '700 44px ' + sans; x.fillStyle = soft; x.fillText(grade(r.total), 88 + sw + 12 + pw + 28, 830);
-    // 한 줄 풀이 (넘치면 두 줄)
-    x.fillStyle = white; x.font = '600 40px ' + sans;
-    wrap(x, summary(r.total), 88, 910, W - 176, 54);
+    x.fillStyle = sub; x.font = '700 44px ' + sans; x.fillText(grade(r.total), 80 + nw + 12 + pw + 28, 820);
+    x.fillStyle = ink; x.font = '600 40px ' + sans; wrap(x, summary(r.total), 88, 910, W - 176, 56);
 
     // 4격
     var bx = 88, by = 1030, bw = (W - 176 - 3 * 20) / 4;
     r.detail.forEach(function (d, i) {
       var px = bx + i * (bw + 20);
-      if (d.lucky) { x.fillStyle = white; roundRect(x, px, by, bw, 150, 24); x.fill(); }
-      else { x.strokeStyle = line; x.lineWidth = 3; roundRect(x, px, by, bw, 150, 24); x.stroke(); }
+      if (d.lucky) { x.fillStyle = red; roundRect(x, px, by, bw, 150, 24); x.fill(); }
+      else { x.strokeStyle = line; x.lineWidth = 4; roundRect(x, px, by, bw, 150, 24); x.stroke(); }
       x.textAlign = 'center';
-      x.fillStyle = d.lucky ? brand : soft;
-      x.font = '600 34px ' + sans; x.fillText(d.label, px + bw / 2, by + 60);
-      x.font = '800 48px ' + sans; x.fillText(d.num + ' ' + d.gradeName, px + bw / 2, by + 120);
+      x.fillStyle = d.lucky ? '#ffffff' : sub;
+      x.font = '600 32px ' + sans; x.fillText(d.life, px + bw / 2, by + 58);
+      x.font = '800 46px ' + sans; x.fillText(d.gradeName, px + bw / 2, by + 118);
     });
 
-    x.textAlign = 'left'; x.fillStyle = soft; x.font = '500 30px ' + sans;
-    x.fillText('재미로 보는 풀이예요 · 과학적 근거는 없어요', 88, H - 72);
+    x.textAlign = 'left'; x.fillStyle = sub; x.font = '500 30px ' + sans;
+    x.fillText(location.host || '이름 풀이', 88, H - 72);
+    x.textAlign = 'right'; x.fillText('재미로 보는 풀이예요', W - 88, H - 72);
   }
   function wrap(x, text, a, b, maxW, lh) {
     var words = text.split(' '), line = '';
@@ -272,7 +349,10 @@
     $('sheet').hidden = false; $('sheet-close').focus();
   }
   $('pay1').addEventListener('click', function () { track('pay990_click'); sheet('전체 풀이'); });
-  $('pay2').addEventListener('click', function () { track('pay39000_click'); sheet('개명·아기 이름 추천'); });
+  $('pay1b').addEventListener('click', function () { track('pay990_click'); sheet('전체 풀이'); });
+  $('t-baby').addEventListener('click', function () { track('pay39000_baby_click'); sheet('아기 이름 짓기'); });
+  $('t-rename').addEventListener('click', function () { track('pay39000_rename_click'); sheet('개명 이름 추천'); });
+  $('t-match').addEventListener('click', function () { track('match_click'); sheet('이름 궁합'); });
   $('sheet-close').addEventListener('click', function () { $('sheet').hidden = true; });
   $('sheet').addEventListener('click', function (e) { if (e.target === $('sheet')) $('sheet').hidden = true; });
   document.addEventListener('keydown', function (e) { if (e.key === 'Escape') $('sheet').hidden = true; });
