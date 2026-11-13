@@ -1,0 +1,30 @@
+/* 색·글꼴·간격은 여기서만 정한다. 화면 코드는 이 값만 쓴다. */
+:root {
+  --bg: #ffffff;
+  --surface: #f4f6f9;
+  --ink: #191f28;
+  --ink-2: #4e5968;
+  --ink-3: #5f6a77;   /* 흰 바탕·연회색 칸 모두 4.5:1 이상 */
+  --line: #e5e8eb;
+  --brand: #1f3c88;   /* 대표색 하나: 흰 글자와 대비 10:1 근처 */
+  --brand-ink: #ffffff;
+  --brand-soft: #eef2fb;
+  --bad: #8b95a1;
+
+  --font: "Pretendard Variable", Pretendard, -apple-system, "Malgun Gothic", sans-serif;
+  --font-hanja: "Noto Serif KR", "Batang", serif;
+
+  --s1: 4px; --s2: 8px; --s3: 12px; --s4: 16px; --s5: 24px; --s6: 32px; --s7: 48px;
+  --r1: 8px; --r2: 12px; --r3: 16px;
+  --dock-h: 88px;
+}
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) {
+    --bg: #101317; --surface: #1a1f26; --ink: #f2f4f6; --ink-2: #c3c9d1; --ink-3: #9aa3ad;
+    --line: #2a313a; --brand: #8fa8ec; --brand-ink: #0c1530; --brand-soft: #1d2740; --bad: #7c8692;
+  }
+}
+:root[data-theme="dark"] {
+  --bg: #101317; --surface: #1a1f26; --ink: #f2f4f6; --ink-2: #c3c9d1; --ink-3: #9aa3ad;
+  --line: #2a313a; --brand: #8fa8ec; --brand-ink: #0c1530; --brand-soft: #1d2740; --bad: #7c8692;
+}
